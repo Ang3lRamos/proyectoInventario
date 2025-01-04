@@ -217,6 +217,12 @@ def abrir_ventana_principal(rol):
         boton_agregar_producto = tk.Button(frame_botones, text="Agregar Producto", width=20, command=mostrar_formulario_agregar_producto)
         boton_agregar_producto.grid(row=1, column=1, padx=10)
 
+        boton_editar_producto = tk.Button(frame_botones, text="Editar Producto", width=20, command=editar_producto_gui)
+        boton_editar_producto.grid(row=2, column=0, padx=10)
+
+        boton_eliminar_producto = tk.Button(frame_botones, text="Eliminar Producto", width=20, command=eliminar_producto_gui)
+        boton_eliminar_producto.grid(row=3, column=1, padx=10)
+
     if rol == "Vendedor":
         boton_vender_producto = tk.Button(frame_botones, text="Vender Producto", width=20, command=vender_producto)
         boton_vender_producto.grid(row=2, column=0, padx=10)
@@ -310,6 +316,61 @@ def vender_producto():
                 messagebox.showwarning("Advertencia", "Stock insuficiente. No puede vender más de lo que hay disponible.")
         else:
             messagebox.showwarning("Advertencia", "Por favor, ingrese una cantidad válida.")
+    else:
+        messagebox.showerror("Error", "Producto no encontrado.")
+
+def editar_producto_gui():
+    try:
+        producto_id = int(simpledialog.askstring("Editar Producto", "Ingrese el ID del producto a editar:"))
+    except ValueError:
+        messagebox.showerror("Error", "Por favor, ingrese un ID válido.")
+        return
+
+    productos = obtener_productos()
+    producto_existente = next((p for p in productos if p[0] == producto_id), None)
+
+    if producto_existente:
+        nuevo_nombre = simpledialog.askstring("Editar Producto", f"Nuevo nombre del producto ({producto_existente[1]}):")
+        
+        try:
+            nuevo_precio = float(simpledialog.askstring("Editar Producto", f"Nuevo precio del producto ({producto_existente[2]}):"))
+            if nuevo_precio <= 0:
+                raise ValueError("El precio debe ser positivo.")
+        except (ValueError, TypeError):
+            messagebox.showwarning("Advertencia", "Por favor, ingrese un precio válido.")
+            return
+
+        try:
+            nuevo_stock = int(simpledialog.askstring("Editar Producto", f"Nuevo stock del producto ({producto_existente[3]}):"))
+            if nuevo_stock < 0:
+                raise ValueError("El stock no puede ser negativo.")
+        except (ValueError, TypeError):
+            messagebox.showwarning("Advertencia", "Por favor, ingrese un stock válido.")
+            return
+
+        # Editar el producto en la base de datos
+        editar_producto(producto_id, nuevo_nombre, nuevo_precio, nuevo_stock)
+        messagebox.showinfo("Éxito", "Producto editado exitosamente.")
+        actualizar_lista_productos()
+    else:
+        messagebox.showerror("Error", "Producto no encontrado.")
+
+def eliminar_producto_gui():
+    try:
+        producto_id = int(simpledialog.askstring("Eliminar Producto", "Ingrese el ID del producto a eliminar:"))
+    except ValueError:
+        messagebox.showerror("Error", "Por favor, ingrese un ID válido.")
+        return
+
+    productos = obtener_productos()
+    producto_existente = next((p for p in productos if p[0] == producto_id), None)
+
+    if producto_existente:
+        confirmar = messagebox.askyesno("Confirmación", f"¿Está seguro de que desea eliminar el producto '{producto_existente[1]}'?")
+        if confirmar:
+            eliminar_producto(producto_id)
+            messagebox.showinfo("Éxito", "Producto eliminado exitosamente.")
+            actualizar_lista_productos()
     else:
         messagebox.showerror("Error", "Producto no encontrado.")
 
