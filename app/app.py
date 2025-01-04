@@ -6,6 +6,104 @@ from database import initialize_database, agregar_usuario, editar_usuario, elimi
 # Inicializar la base de datos
 initialize_database()
 
+# Función para buscar usuarios
+def buscar_usuario():
+    criterio = simpledialog.askstring("Buscar Usuario", "Ingrese el criterio de búsqueda (Nombre o ID):")
+    if not criterio:
+        messagebox.showwarning("Advertencia", "Por favor, ingrese un criterio de búsqueda.")
+        return
+    
+    usuarios = obtener_usuarios()
+    resultados = [u for u in usuarios if criterio.lower() in str(u[0]).lower() or criterio.lower() in u[1].lower()]
+    
+    lista_usuarios.delete(0, tk.END)  # Limpiar la lista
+    if resultados:
+        for usuario in resultados:
+            lista_usuarios.insert(tk.END, f"ID: {usuario[0]} - Nombre: {usuario[1]} - Contraseña: {usuario[2]} - Rol: {usuario[3]}")
+    else:
+        messagebox.showinfo("Sin Resultados", "No se encontraron usuarios que coincidan con el criterio.")
+
+# Función para buscar productos
+def buscar_producto():
+    criterio = simpledialog.askstring("Buscar Producto", "Ingrese el criterio de búsqueda (Nombre o ID):")
+    if not criterio:
+        messagebox.showwarning("Advertencia", "Por favor, ingrese un criterio de búsqueda.")
+        return
+    
+    productos = obtener_productos()
+    resultados = [p for p in productos if criterio.lower() in str(p[0]).lower() or criterio.lower() in p[1].lower()]
+    
+    lista_productos.delete(0, tk.END)  # Limpiar la lista
+    if resultados:
+        for producto in resultados:
+            lista_productos.insert(tk.END, f"ID: {producto[0]} - Nombre: {producto[1]} - Precio: {producto[2]} - Stock: {producto[3]}")
+    else:
+        messagebox.showinfo("Sin Resultados", "No se encontraron productos que coincidan con el criterio.")
+
+
+def abrir_ventana_usuarios():
+    ventana_usuarios = tk.Toplevel(root)
+    ventana_usuarios.title("Gestión de Usuarios")
+    ventana_usuarios.geometry("600x400")
+
+    global lista_usuarios
+    lista_usuarios = tk.Listbox(ventana_usuarios, width=80, height=15)
+    lista_usuarios.pack(pady=20)
+
+    frame_botones = tk.Frame(ventana_usuarios)
+    frame_botones.pack(pady=10)
+
+    boton_buscar_usuario = tk.Button(frame_botones, text="Buscar Usuario", width=20, command=buscar_usuario)
+    boton_buscar_usuario.grid(row=0, column=2, padx=10)
+
+    boton_agregar = tk.Button(frame_botones, text="Agregar Usuario", width=20, command=mostrar_formulario_agregar_usuario)
+    boton_agregar.grid(row=0, column=0, padx=10)
+
+    boton_editar = tk.Button(frame_botones, text="Editar Usuario", width=20, command=editar_usuario_gui)
+    boton_editar.grid(row=0, column=1, padx=10)
+
+    boton_eliminar = tk.Button(frame_botones, text="Eliminar Usuario", width=20, command=eliminar_usuario_gui)
+    boton_eliminar.grid(row=1, column=0, padx=10)
+
+    boton_exportar = tk.Button(frame_botones, text="Exportar Usuarios", width=20, command=exportar_usuarios_gui)
+    boton_exportar.grid(row=1, column=1, padx=10)
+
+    # Botón para cerrar sesión
+    boton_cerrar_sesion = tk.Button(frame_botones, text="Cerrar Sesión", width=20, command=cerrar_sesion)
+    boton_cerrar_sesion.grid(row=1, column=0, columnspan=2, pady=10)
+
+    actualizar_lista_usuarios()
+
+def abrir_ventana_productos():
+    ventana_productos = tk.Toplevel(root)
+    ventana_productos.title("Gestión de Productos")
+    ventana_productos.geometry("600x400")
+
+    global lista_productos
+    lista_productos = tk.Listbox(ventana_productos, width=80, height=15)
+    lista_productos.pack(pady=20)
+
+    boton_buscar_producto = tk.Button(frame_botones, text="Buscar Producto", width=20, command=buscar_producto)
+    boton_buscar_producto.grid(row=1, column=2, padx=10)
+
+    frame_botones = tk.Frame(ventana_productos)
+    frame_botones.pack(pady=10)
+
+    boton_agregar = tk.Button(frame_botones, text="Agregar Producto", width=20, command=mostrar_formulario_agregar_producto)
+    boton_agregar.grid(row=0, column=0, padx=10)
+
+    boton_editar = tk.Button(frame_botones, text="Editar Producto", width=20, command=editar_producto_gui)
+    boton_editar.grid(row=0, column=1, padx=10)
+
+    boton_eliminar = tk.Button(frame_botones, text="Eliminar Producto", width=20, command=eliminar_producto_gui)
+    boton_eliminar.grid(row=1, column=0, padx=10)
+
+    boton_vender = tk.Button(frame_botones, text="Vender Producto", width=20, command=vender_producto)
+    boton_vender.grid(row=1, column=1, padx=10)
+
+    actualizar_lista_productos()
+
+
 # Función para actualizar la lista de usuarios
 def actualizar_lista_usuarios():
     usuarios = obtener_usuarios()  # Obtener usuarios desde la base de datos
@@ -205,15 +303,6 @@ def abrir_ventana_principal(rol):
     frame_botones.pack(pady=10)
 
     if rol == "Administrador":
-        boton_agregar = tk.Button(frame_botones, text="Agregar Usuario", width=20, command=mostrar_formulario_agregar_usuario)
-        boton_agregar.grid(row=0, column=0, padx=10)
-
-        boton_editar = tk.Button(frame_botones, text="Editar Usuario", width=20, command=editar_usuario_gui)
-        boton_editar.grid(row=0, column=1, padx=10)
-
-        boton_eliminar = tk.Button(frame_botones, text="Eliminar Usuario", width=20, command=eliminar_usuario_gui)
-        boton_eliminar.grid(row=1, column=0, padx=10)
-
         boton_agregar_producto = tk.Button(frame_botones, text="Agregar Producto", width=20, command=mostrar_formulario_agregar_producto)
         boton_agregar_producto.grid(row=1, column=1, padx=10)
 
@@ -234,6 +323,14 @@ def abrir_ventana_principal(rol):
     # Botón para cerrar sesión
     boton_cerrar_sesion = tk.Button(frame_botones, text="Cerrar Sesión", width=20, command=cerrar_sesion)
     boton_cerrar_sesion.grid(row=3, column=0, columnspan=2, pady=10)
+
+    # Botones para abrir las ventanas separadas
+    boton_usuarios = tk.Button(frame_botones, text="Gestión de Usuarios", width=20, command=abrir_ventana_usuarios)
+    boton_usuarios.grid(row=0, column=0, padx=10)
+
+    boton_productos = tk.Button(frame_botones, text="Gestión de Productos", width=20, command=abrir_ventana_productos)
+    boton_productos.grid(row=0, column=1, padx=10)
+
 
     # Cargar la lista inicial de usuarios
     actualizar_lista_usuarios()
